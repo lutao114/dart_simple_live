@@ -8,15 +8,25 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    env:
+      # 临时兼容旧版 Actions，避免 Node.js 20 报错
+      ACTIONS_ALLOW_UNSECURE_NODE_VERSION: true
     steps:
       - name: 拉取源码
         uses: actions/checkout@v4
 
+      - name: 配置 JDK（Android 编译必须）
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
       - name: 配置 Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.22.0
+          flutter-version: 3.27.1
           channel: stable
+          cache: true
 
       - name: 安装依赖
         working-directory: ./simple_live_app
@@ -24,14 +34,18 @@ jobs:
 
       - name: 新建空签名配置（解决编译报错）
         working-directory: ./simple_live_app/android
-        run: echo -e "storePassword=\nkeyPassword=\nkeyAlias=\nstoreFile=" > key.properties
+        run: |
+          echo "storePassword=" > key.properties
+          echo "keyPassword=" >> key.properties
+          echo "keyAlias=" >> key.properties
+          echo "storeFile=" >> key.properties
 
       - name: 编译安卓正式包
         working-directory: ./simple_live_app
-        run: flutter build apk --release --split-per-abi
+        run: flutter build apk --release --no-tree-shake-icons
 
       - name: 上传安装包
         uses: actions/upload-artifact@v4
         with:
           name: SimpleLive-APK
-          path: simple_live_app/build/app/outputs/flutter-apk/app-release-*.apk
+          path: simple_live_app/build/app/outputs/flutter-apk/app-release.apk
