@@ -1,0 +1,37 @@
+name: Android Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取源码
+        uses: actions/checkout@v4
+
+      - name: 配置 Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.22.0
+          channel: stable
+
+      - name: 安装依赖
+        working-directory: ./simple_live_app
+        run: flutter pub get
+
+      - name: 新建空签名配置（解决编译报错）
+        working-directory: ./simple_live_app/android
+        run: echo -e "storePassword=\nkeyPassword=\nkeyAlias=\nstoreFile=" > key.properties
+
+      - name: 编译安卓正式包
+        working-directory: ./simple_live_app
+        run: flutter build apk --release --split-per-abi
+
+      - name: 上传安装包
+        uses: actions/upload-artifact@v4
+        with:
+          name: SimpleLive-APK
+          path: simple_live_app/build/app/outputs/flutter-apk/app-release-*.apk
