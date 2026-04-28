@@ -20,22 +20,28 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 配置 Flutter（固定兼容版本）
+      - name: 配置 Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.24.0
+          flutter-version: 3.27.1
           channel: stable
           cache: true
+
+      - name: 修复 Kotlin 版本
+        working-directory: ./simple_live_app/android
+        run: |
+          # 修改 build.gradle，强制升级 Kotlin 到兼容版本
+          sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = "1.9.20"/g' build.gradle
+          sed -i 's/id "org.jetbrains.kotlin.android" version .*/id "org.jetbrains.kotlin.android" version "1.9.20" apply false/g' build.gradle
+          # 创建空签名配置
+          echo "storePassword=" > key.properties
+          echo "keyPassword=" >> key.properties
+          echo "keyAlias=" >> key.properties
+          echo "storeFile=" >> key.properties
 
       - name: 安装依赖
         working-directory: ./simple_live_app
         run: flutter pub get
-
-      - name: 配置 Kotlin 版本（解决不兼容）
-        working-directory: ./simple_live_app/android
-        run: |
-          echo -e "ext.kotlin_version = '1.9.20'" >> build.gradle
-          echo -e "storePassword=\nkeyPassword=\nkeyAlias=\nstoreFile=" > key.properties
 
       - name: 编译安卓正式包
         working-directory: ./simple_live_app
