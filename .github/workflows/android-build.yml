@@ -37,15 +37,13 @@ jobs:
           echo "keyAlias=" >> key.properties
           echo "storeFile=" >> key.properties
 
-      # 动态注入dependency_overrides，临时强制intl版本，不修改仓库源码
+      # 使用sed追加dependency_overrides，抛弃EOF语法，避免yaml解析出错
       - name: 注入intl版本覆盖
         working-directory: ./simple_live_app
         run: |
-          cat >> pubspec.yaml <<'EOF'
-
-dependency_overrides:
-  intl: ^0.20.2
-EOF
+          echo "" >> pubspec.yaml
+          echo "dependency_overrides:" >> pubspec.yaml
+          echo "  intl: ^0.20.2" >> pubspec.yaml
 
       - name: 安装依赖
         working-directory: ./simple_live_app
