@@ -37,11 +37,19 @@ jobs:
           echo "keyAlias=" >> key.properties
           echo "storeFile=" >> key.properties
 
-      - name: 安装依赖，修复intl版本冲突
+      # 动态注入dependency_overrides，临时强制intl版本，不修改仓库源码
+      - name: 注入intl版本覆盖
         working-directory: ./simple_live_app
         run: |
-          flutter pub add intl:^0.20.2 --overrides
-          flutter pub get
+          cat >> pubspec.yaml <<'EOF'
+
+dependency_overrides:
+  intl: ^0.20.2
+EOF
+
+      - name: 安装依赖
+        working-directory: ./simple_live_app
+        run: flutter pub get
 
       - name: 编译安卓正式包
         working-directory: ./simple_live_app
