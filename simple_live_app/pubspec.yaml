@@ -78,6 +78,7 @@ dependencies:
 
 dependency_overrides: 
   screen_brightness: 2.1.2
+  screen_brightness_android: 2.1.2
   intl: ^0.20.2
   dynamic_color: 1.6.8
 
