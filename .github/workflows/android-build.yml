@@ -29,18 +29,19 @@ jobs:
           channel: stable
           cache: true
 
-      - name: 调整Android编译SDK到36 & 创建空签名配置
+      - name: 创建空签名配置
         working-directory: ./simple_live_app/android
         run: |
-          # 创建空key.properties（保留，用于无签名构建）
           echo "storePassword=" > key.properties
           echo "keyPassword=" >> key.properties
           echo "keyAlias=" >> key.properties
           echo "storeFile=" >> key.properties
 
-      - name: 安装依赖
+      - name: 安装依赖，修复intl版本冲突
         working-directory: ./simple_live_app
-        run: flutter pub get
+        run: |
+          flutter pub add intl:^0.20.2 --overrides
+          flutter pub get
 
       - name: 编译安卓正式包
         working-directory: ./simple_live_app
